@@ -3,8 +3,8 @@ name: CI/CD - Next.js Static Deploy to Hostinger
 on:
   push:
     branches:
-      - main 
-  workflow_dispatch: 
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -12,19 +12,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 
+        uses: actions/checkout@v4
 
       - name: Setup Node.js 20 with npm cache
         uses: actions/setup-node@v4
         with:
-          node-version: "20" 
-          cache: "npm" 
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci 
+        run: npm ci
 
       - name: Build static site
-        run: npm run build 
+        run: npm run build
 
       - name: Setup SSH key and known_hosts
         shell: bash
@@ -32,18 +32,24 @@ jobs:
           set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf "%s" "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          printf "%s" "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/hostinger_deploy
+          chmod 600 ~/.ssh/hostinger_deploy
           ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Deploy out/ via rsync over SSH
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
+      - name: Deploy via lftp SFTP
         shell: bash
         run: |
           set -euo pipefail
-          rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=yes" \
-            out/ "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/"
+          lftp -c "
+            set sftp:connect-program 'ssh -i $HOME/.ssh/hostinger_deploy -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no';
+            connect sftp://${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }};
+            mirror --reverse --delete --verbose out/ ${{ secrets.HOSTINGER_PATH }};
+            bye
+          "
 
       - name: Deployment success timestamp
         shell: bash
