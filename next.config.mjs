@@ -33,6 +33,7 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "export",
   poweredByHeader: false,
   images: {
     // Disable the built-in image optimizer route to reduce attack surface.
