@@ -42,14 +42,20 @@ jobs:
 
       - name: Deploy via lftp SFTP
         shell: bash
+        env:
+          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
+          HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
+          HOSTINGER_PORT: ${{ secrets.HOSTINGER_PORT }}
+          HOSTINGER_PATH: ${{ secrets.HOSTINGER_PATH }}
         run: |
           set -euo pipefail
-          lftp -c "
-            set sftp:connect-program 'ssh -i $HOME/.ssh/hostinger_deploy -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no';
-            connect sftp://${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }};
-            mirror --reverse --delete --verbose out/ ${{ secrets.HOSTINGER_PATH }};
-            bye
-          "
+          cat > /tmp/deploy.lftp <<EOF
+          set sftp:connect-program "ssh -i $HOME/.ssh/hostinger_deploy -p $HOSTINGER_PORT -o StrictHostKeyChecking=no -o BatchMode=yes"
+          open sftp://$HOSTINGER_USER@$HOSTINGER_HOST
+          mirror --reverse --delete --verbose out/ $HOSTINGER_PATH
+          bye
+          EOF
+          lftp -f /tmp/deploy.lftp
 
       - name: Deployment success timestamp
         shell: bash
