@@ -1,11 +1,12 @@
 {
   "name": "portfolio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npx serve@latest out",
+    "preview": "npx serve@latest out",
     "lint": "next lint"
   },
   "dependencies": {

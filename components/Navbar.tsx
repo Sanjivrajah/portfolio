@@ -101,20 +101,36 @@ export function Navbar() {
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-200 ${
+        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-200 ${
           mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         <div
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
           onClick={() => setMobileOpen(false)}
         />
         <nav
-          className={`absolute right-0 top-0 h-full w-72 bg-light-bg dark:bg-dark-bg border-l border-light-surface dark:border-dark-surface shadow-2xl transition-transform duration-200 ${
-            mobileOpen ? "translate-x-0" : "translate-x-full"
+          className={`absolute left-1/2 top-1/2 w-[min(90vw,22rem)] -translate-x-1/2 rounded-2xl border border-light-surface/70 bg-light-bg/80 p-5 shadow-2xl backdrop-blur-xl dark:border-dark-surface/70 dark:bg-dark-surface/75 transition-all duration-200 ${
+            mobileOpen
+              ? "-translate-y-1/2 scale-100 opacity-100"
+              : "-translate-y-[46%] scale-95 opacity-0"
           }`}
+          aria-label="Mobile navigation"
         >
-          <div className="flex flex-col gap-2 px-6 pt-24">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm font-semibold tracking-wide text-light-text dark:text-dark-text">
+              Navigation
+            </p>
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-light-surface dark:bg-dark-bg text-light-text dark:text-dark-text"
+              aria-label="Close menu"
+            >
+              <HiXMark size={20} />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-2">
             <a
               href="/wishes"
               onClick={() => setMobileOpen(false)}
@@ -134,7 +150,7 @@ export function Navbar() {
               </a>
             ))}
 
-            <div className="mt-6 border-t border-light-surface dark:border-dark-surface pt-6">
+            <div className="mt-4 border-t border-light-surface dark:border-dark-surface pt-4">
               <a
                 href="/assets/resume.pdf"
                 target="_blank"
