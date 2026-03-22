@@ -1,0 +1,21 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve Next.js static assets directly without rewrites.
+  RewriteRule ^_next/static/ - [L]
+
+  # Handle the root path.
+  RewriteRule ^$ /index.html [L]
+
+  # If /pagename/index.html exists, serve it.
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.+?)/?$ /$1/index.html [L]
+
+  # Otherwise, if /pagename.html exists, serve it.
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+</IfModule>
+
+ErrorDocument 404 /404.html
