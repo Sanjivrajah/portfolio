@@ -26,37 +26,25 @@ jobs:
       - name: Build static site
         run: npm run build
 
-      - name: Setup SSH key and known_hosts
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf "%s" "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/hostinger_deploy
-          chmod 600 ~/.ssh/hostinger_deploy
-          ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
       - name: Deploy via lftp SFTP
-        shell: bash
         env:
-          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
-          HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
-          HOSTINGER_PORT: ${{ secrets.HOSTINGER_PORT }}
-          HOSTINGER_PATH: ${{ secrets.HOSTINGER_PATH }}
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_PATH }}
         run: |
-          set -euo pipefail
-          cat > /tmp/deploy.lftp <<EOF
-          set sftp:connect-program "ssh -i $HOME/.ssh/hostinger_deploy -p $HOSTINGER_PORT -o StrictHostKeyChecking=no -o BatchMode=yes"
-          open sftp://$HOSTINGER_USER@$HOSTINGER_HOST
-          mirror --reverse --delete --verbose out/ $HOSTINGER_PATH
+          lftp -u "$SFTP_USER","$SFTP_PASS" \
+            -p "$SFTP_PORT" \
+            sftp://$SFTP_HOST <<EOF
+          set sftp:auto-confirm yes
+          set net:max-retries 3
+          mirror --reverse --delete --verbose out/ $SFTP_PATH
           bye
           EOF
-          lftp -f /tmp/deploy.lftp
 
       - name: Deployment success timestamp
-        shell: bash
-        run: echo "✅ Deployment completed successfully at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+        run: echo "✅ Deployed at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
