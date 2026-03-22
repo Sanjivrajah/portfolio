@@ -2,26 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  ::selection {
+    @apply bg-dark-accent/30 text-dark-text;
+  }
+
+  .dark ::selection {
+    @apply bg-dark-accent/30 text-dark-text;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .accent-gradient {
+    @apply bg-gradient-to-r from-dark-accent to-emerald-400;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+  }
+
+  .dark .hero-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+  }
+
+  .light .hero-dots,
+  :root:not(.dark) .hero-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.06) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-light-bg dark:bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-light-muted/40 dark:bg-dark-muted/40 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-light-muted/60 dark:bg-dark-muted/60;
 }
